@@ -23,6 +23,8 @@ database () {
 	db_file_name="db-$(date '+%Y-%m-%d--%T').sql"
 
 	echo "[-] $(print_date) - Backuping database ..." | sudo tee /backup/log/database.log
+	# delete fist sql from directory
+	sudo rm -rf $(find /backup/gz -name "db-*.sql.gz" -type f | sort | head -1)
 
 	sudo rm -rf /backup/database/*
 	if mysqldump --user=root -p"root" -x -A | sudo tee /backup/database/"$db_file_name" > /dev/null; then
@@ -74,15 +76,6 @@ mercury () {
 
 ##### CONFIG FILES #####
 config () {
-	files_bak () {
-		files=("/etc/fstab")
-
-		for file in "${files[@]}":
-		do
-			sudo cp -r "$file" /backup/config/files
-		done
-	}
-
 	sudo rm -rf /backup/config/*
 
 	# APACHE
@@ -118,7 +111,31 @@ config () {
 		echo "[-] $(print_date) - |  |_ ERROR: Bind9" | sudo tee -a /backup/log/config.log
 	fi
 
+	# CRON #
+	cron_bak () {
+		for dir_cron in $(sudo find /etc/cron* -type d)
+		do
+			sudo cp -r "$dir_cron" /backup/config/cron
+		done
+	}
+
+	echo "[-] $(print_date) - |_ Cron ..." | sudo tee -a /backup/log/config.log
+	if cron_bak; then
+		echo "[-] $(print_date) - |  |_ Cron completed" | sudo tee -a /backup/log/config.log
+	else
+		echo "[-] $(print_date) - |  |_ ERROR: Cron" | sudo tee -a /backup/log/config.log
+	fi
+
 	# FILES #
+	files_bak () {
+		files=("/etc/fstab")
+
+		for file_bak in "${files[@]}"
+		do
+			sudo cp -r "$file_bak" /backup/config/files
+		done
+	}
+
 	echo "[-] $(print_date) - |_ Files ..." | sudo tee -a /backup/log/config.log
 	if files_bak; then
 		echo "[-] $(print_date) - |  |_ Files completed" | sudo tee -a /backup/log/config.log
