@@ -4,31 +4,38 @@ display_date() {
 	date "+%H:%M:%S %d/%m/%Y"
 }
 
-# create user
-echo "[-] $(display_date) ===== CREATION OF USER $1 =====" |& tee -a /etc/user-scripts/log/create-user.log
+log_file="/etc/user-scripts/log/create-user.log"
 
-if sudo useradd -b /home/"$1" -d /home/"$1" -m -s /bin/false "$1"; then
-	echo "[-] $(display_date) - creating user $1 ..." |& tee -a /etc/user-scripts/log/create-user.log
+for file in $(find /var/www/html/users/ -type f)
+do
+	username=$(grep username $file | awk '{print $3}')
+	password=$(grep password $file | awk '{print $3}')
+	# create user
+	echo "[-] $(display_date) ===== CREATION OF USER $username =====" |& tee -a "$log_file"
 
-	# sets password
-	echo "[-] $(display_date) - changing $1's password ..." |& tee -a /etc/user-scripts/log/create-user.log
-	user="$1"
-	pass="$2"
-	echo "$user:$pass" | sudo chpasswd
+	if sudo useradd -b /home/"$user" -d /home/"$username" -m -s /bin/false "$username"; then
+		echo "[-] $(display_date) - creating $username ..." |& tee -a "$log_file"
 
-	# changes /home owner and permissions
-	echo "[-] $(display_date) - changing /home/$1 owner to $1:$1 ..." |& tee -a /etc/user-scripts/log/create-user.log
-	sudo chown "$1":"$1" /home/"$1"
+		# sets password
+		echo "[-] $(display_date) - changing $username's password ..." |& tee -a "$log_file"
+		userch="$username"
+		passch="$password"
+		echo "$userch:$passch" | sudo chpasswd
 
-	echo "[-] $(display_date) - changing /home/$1 permissions to 700 ..." |& tee -a /etc/user-scripts/log/create-user.log
-	sudo chmod 700 /home/"$1"
+		# changes /home owner and permissions
+		echo "[-] $(display_date) - changing /home/$username owner to $username:$username ..." |& tee -a "$log_file"
+		sudo chown "$username":"$username" /home/"$suername"
 
-	# looks for the user in the /etc/passwd to check if it's created
-	if getent passwd | grep "\<$1\>"; then
-		echo "[+] $(display_date) - user $1 was created successfully" |& tee -a /etc/user-scripts/log/create-user.log
+		echo "[-] $(display_date) - changing /home/$username permissions to 700 ..." |& tee -a "$log_file"
+		sudo chmod 700 /home/"$1"
+
+		# looks for the user in the /etc/passwd to check if it's created
+		if getent passwd | grep "\<$username\>"; then
+			echo "[+] $(display_date) - user $username was created successfully" |& tee -a "$log_file"
+		fi
+	else
+		# user creation fails
+		echo "[!] $(display_date) - user creation failed" |& tee -a "$log_file"
 	fi
-else
-	# user creation fails
-	echo "[!] $(display_date) - user creation failed" |& tee -a /etc/user-scripts/log/create-user.log
-fi
-echo "" |& tee -a /etc/user-scripts/log/create-user.log
+done
+echo "" |& tee -a "$log_file"
