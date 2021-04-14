@@ -78,7 +78,7 @@ mercury () {
 config () {
 	sudo rm -rf /backup/config/*
 
-	# APACHE
+	# APACHE #
 	echo "[-] $(print_date) - Copying Config files ..." | sudo tee /backup/log/config.log
 	echo "[-] $(print_date) - |_ Apache ..." | sudo tee -a /backup/log/config.log
 	if sudo cp -r /etc/apache2 /backup/config; then
@@ -87,7 +87,7 @@ config () {
 		echo "[-] $(print_date) - |  |_ ERROR: Apache" | sudo tee -a /backup/log/config.log
 	fi
 
-	# POSTFIX
+	# POSTFIX #
 	echo "[-] $(print_date) - |_ Postfix ..." | sudo tee -a /backup/log/config.log
 	if sudo cp -r /etc/postfix /backup/config; then
 		echo "[-] $(print_date) - |  |_ Postfix completed" | sudo tee -a /backup/log/config.log
@@ -95,7 +95,7 @@ config () {
 		echo "[-] $(print_date) - |  |_ ERROR: Postfix" | sudo tee -a /backup/log/config.log
 	fi
 
-	# DOVECOT
+	# DOVECOT #
 	echo "[-] $(print_date) - |_ Dovecot ..." | sudo tee -a /backup/log/config.log
 	if sudo cp -r /etc/dovecot /backup/config; then
 		echo "[-] $(print_date) - |  |_ Dovecot completed" | sudo tee -a /backup/log/config.log
@@ -117,6 +117,7 @@ config () {
 		do
 			sudo cp -r "$dir_cron" /backup/config/cron
 		done
+		sudo crontab -l > /backup/config/cron/crontab_by_root
 	}
 
 	echo "[-] $(print_date) - |_ Cron ..." | sudo tee -a /backup/log/config.log
