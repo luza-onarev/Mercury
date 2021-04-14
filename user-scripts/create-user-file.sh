@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 display_date() {
 	date "+%H:%M:%S %d/%m/%Y"
