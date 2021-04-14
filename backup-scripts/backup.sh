@@ -6,11 +6,10 @@ sudo mount -t ext4 /dev/sdb1 /media/backup 2> /dev/null
 # make sure folders exists
 sudo mkdir -p /backup/gz 2> /dev/null
 sudo mkdir -p /backup/log 2> /dev/null
-
 sudo mkdir -p /backup/database 2> /dev/null
 sudo mkdir -p /backup/home 2> /dev/null
 sudo mkdir -p /backup/mercury 2> /dev/null
-sudo mkdir -p /backup/config 2> /dev/null
+sudo mkdir -p /backup/config/files 2> /dev/null
 
 # date print before every echo
 print_date () {
@@ -24,13 +23,12 @@ database () {
 
 	echo "[-] $(print_date) - Backuping database ..." | sudo tee /backup/log/database.log
 	# delete fist sql from directory
-	sudo rm -rf $(find /backup/gz -name "db-*.sql.gz" -type f | sort | head -1)
+	sudo rm -rf "$(find /backup/gz -name "db-*.sql.gz" -type f | sort | head -1)"
 
 	sudo rm -rf /backup/database/*
 	if mysqldump --user=root -p"root" -x -A | sudo tee /backup/database/"$db_file_name" > /dev/null; then
 		echo "[-] $(print_date) - Backup database completed" | sudo tee -a /backup/log/database.log
 	fi
-
 	echo "" | sudo tee -a /backup/log/database.log
 
 	echo "[-] $(print_date) - Compressing database ..." | sudo tee -a /backup/log/database.log
@@ -47,9 +45,7 @@ home () {
 	if sudo cp -r /home /backup/home/; then
 		echo "[-] $(print_date) - Copy /home completed" | sudo tee -a /backup/log/home.log
 	fi
-
 	echo "" | sudo tee -a /backup/log/home.log
-
 
 	echo "[-] $(print_date) - Compressing /backup/home ..." | sudo tee -a /backup/log/home.log
 	if sudo tar -zcf /backup/gz/home.tar.gz /backup/home/home 2> /dev/null; then
@@ -117,7 +113,7 @@ config () {
 		do
 			sudo cp -r "$dir_cron" /backup/config/cron
 		done
-		sudo crontab -l > /backup/config/cron/crontab_by_root
+		sudo crontab -l | sudo tee /backup/config/cron/crontab_by_root > /dev/null
 	}
 
 	echo "[-] $(print_date) - |_ Cron ..." | sudo tee -a /backup/log/config.log
@@ -174,3 +170,13 @@ else
 		esac
 	done
 fi
+
+mail_log () {
+	for var in "$@"
+	do
+		cat /backup/log/"$var".log
+		echo
+	done
+	}
+		
+	echo -e "Subject: == BACKUP $@ ==\\n$(mail_log "$@")" | sudo sendmail -f backup@mercury.cells.es ismael
