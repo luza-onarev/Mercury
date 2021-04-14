@@ -20,9 +20,7 @@
 	}
 
 	$check_premium = mysqli_query($db_conn, "SELECT is_premium FROM user WHERE username = '$curr_username'");
-
 	$check_premium_data = mysqli_fetch_array($check_premium);
-
 	$premium = $check_premium_data["is_premium"];
 ?>
 <!DOCTYPE html>
@@ -65,7 +63,7 @@
 						<?php
 							$home_size = shell_exec("du -sh /home/$curr_username | awk '{print $1}'");
 							if (is_null($home_size)) {
-								echo "//no data available//";
+								echo "Loading folder size ...";
 							} else {
 								if ($premium) {
 									echo $home_size . " - Maximum: Unlimited";
