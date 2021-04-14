@@ -43,7 +43,6 @@
 							$_SESSION["username"] = $_POST["username"];
 						}
 					}
-
 					$_POST = array();
 				?>
 				<p class="already_acc">
