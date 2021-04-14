@@ -5,6 +5,7 @@ display_date() {
 }
 
 log_file="/etc/user-scripts/log/create-user.log"
+no_run_log_file="/etc/user-scripts/log/cron.log"
 
 if [[ $(find /var/www/html/users/ -type f | wc -l) != 0 ]]; then
 	for file in $(find /var/www/html/users/ -type f)
@@ -43,5 +44,5 @@ if [[ $(find /var/www/html/users/ -type f | wc -l) != 0 ]]; then
 			echo "" |& tee -a "$log_file"
 		done
 else
-	echo -e "no files"
+	echo "[-] $(display_date) - no users to create" |& tee -a "$no_run_log_file"
 fi
