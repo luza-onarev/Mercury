@@ -15,6 +15,7 @@ sudo mkdir -p /backup/config/files 2> /dev/null
 print_date () {
 	date "+%Y/%m/%d %T"
 }
+bak_mail=()
 
 ##### DATABASE #####
 database () {
@@ -35,6 +36,7 @@ database () {
 
 	if sudo gzip -k /backup/database/"$db_file_name" && sudo mv /backup/database/"$db_file_name".gz /backup/gz; then
 		echo "[-] $(print_date) - Compress database completed" | sudo tee -a /backup/log/database.log
+		bak_mail+=("database")
 	fi
 	echo
 }
@@ -50,6 +52,7 @@ home () {
 	echo "[-] $(print_date) - Compressing /backup/home ..." | sudo tee -a /backup/log/home.log
 	if sudo tar -zcf /backup/gz/home.tar.gz /backup/home/home 2> /dev/null; then
 		echo "[-] $(print_date) - Compress /backup/home completed" | sudo tee -a /backup/log/home.log
+		bak_mail+=("home")
 	fi
 	echo
 }
@@ -66,6 +69,7 @@ mercury () {
 	echo "[-] $(print_date) - Compressing Mercury ..." | sudo tee -a /backup/log/mercury.log
 	if sudo tar -zcf /backup/gz/mercury.tar.gz /backup/mercury/html 2> /dev/null; then
 		echo "[-] $(print_date) - Compress Mercury completed" | sudo tee -a /backup/log/mercury.log
+		bak_mail+=("mercury")
 	fi
 	echo
 }
@@ -139,6 +143,7 @@ config () {
 	else
 		echo "[-] $(print_date) - |  |_ ERROR: Files" | sudo tee -a /backup/log/config.log
 	fi
+	bak_mail+=("config")
 	echo
 }
 
@@ -172,11 +177,11 @@ else
 fi
 
 mail_log () {
-	for var in "$@"
+	for var in "${bak_mail[@]}"
 	do
 		cat /backup/log/"$var".log
 		echo
 	done
-	}
-		
-	echo -e "Subject: == BACKUP $@ ==\\n$(mail_log "$@")" | sudo sendmail -f backup@mercury.cells.es ismael
+}
+
+echo -e "Subject: == BACKUP ${bak_mail[@]} ==\\n$(mail_log)" | sudo sendmail -f backup@mercury.cells.es ismael
