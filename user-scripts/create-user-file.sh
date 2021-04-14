@@ -26,10 +26,10 @@ if [[ $(find /var/www/html/users/ -type f | wc -l) != 0 ]]; then
 
 				# changes /home owner and permissions
 				echo "[-] $(display_date) - changing /home/$username owner to $username:$username ..." |& tee -a "$log_file"
-				sudo chown "$username":"$username" /home/"$username"
+				sudo chown -R "$username":"$username" /home/"$username"
 
 				echo "[-] $(display_date) - changing /home/$username permissions to 700 ..." |& tee -a "$log_file"
-				sudo chmod 700 /home/"$1"
+				sudo chmod -R 700 /home/"$username"
 
 				# looks for the user in the /etc/passwd to check if it's created
 				if getent passwd | grep "\\<$username\\>"; then
