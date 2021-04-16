@@ -109,7 +109,7 @@
 							if ($premium) {
 								echo "Same as login";
 							} else {
-								echo "SSH access is not permitted with free account";
+								echo "SSH access is not permitted<br>with free account";
 							}
 						?>
 					</td>

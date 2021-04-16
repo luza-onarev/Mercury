@@ -1,4 +1,7 @@
 <?php
+	error_reporting(E_ALL);
+	ini_set('display_errors', TRUE);
+	ini_set('display_startup_errors', TRUE);
 	## function to validate the user info before insert it to database ##
 	function validate_signup_info() {
 		# variables to use in inserts and selects
@@ -13,6 +16,7 @@
 
 		$valid_signup = 1;
 
+		# avoid sql attacks by removing non alphanumerical characters
 		$username = preg_replace("/[^a-z0-9]+/", "", $_POST["username"]);
 
 		if ($username != $_POST["username"]) {
@@ -88,6 +92,7 @@
 	function validate_login_info() {
 		$valid_login = 1;
 
+		# avoid sql attacks by removing non alphanumerical characters
 		$username = preg_replace("/[^a-z0-9]+/", "", $_POST["username"]);
 		$password = hash("sha256", $_POST["password"]);
 
@@ -100,22 +105,43 @@
 		} else {
 			$check_username = mysqli_query($GLOBALS["db_conn"], "SELECT username FROM user WHERE username = '$username'");
 			$check_password = mysqli_query($GLOBALS["db_conn"], "SELECT password FROM user WHERE username = '$username'");
+			$check_status = mysqli_query($GLOBALS["db_conn"], "SELECT is_active FROM user WHERE username = '$username'");
 
 			$check_username_data = mysqli_fetch_array($check_username);
 			$check_password_data = mysqli_fetch_array($check_password);
+			$check_status_data   = mysqli_fetch_array($check_status);
+
+			if ($check_status_data["is_active"] == 0) {
+				if (is_null($check_username_data)) {
+					$valid_login = 0;
+				} else {
+					echo '<div class="error-signup">';
+					echo "User is disabled!<br>";
+					echo "Contact the System Administrator<br>to get more help!<br>";
+					# TODO: word "help" should redirect to help page on how to contact a sys admin
+					echo "</div>";
+					$valid_login = 0;
+
+					# if user is disabled end function and skip the remaining checks
+					return 0;
+				}
+					
+			}
 
 			if (is_null($check_username_data)) {
 				echo '<div class="error-signup">';
 				echo "User name not found!<br>";
 				echo "</div>";
 				$valid_login = 0;
-			} elseif ($check_password_data["password"] != $password) {
+
+				# if user doesn't exists end function and skip the remaining check
+				return 0;
+			}
+			if ($check_password_data["password"] != $password) {
 				echo '<div class="error-signup">';
 				echo "Wrong password!<br>";
 				echo "</div>";
 				$valid_login = 0;
-			} else {
-				$valid_login = 1;
 			}
 
 			if ($valid_login) {
@@ -163,5 +189,29 @@
 
 		mysqli_close($GLOBALS["db_conn"]);
 		$_POST = array();
+	}
+
+	function create_user_db() {
+		## DATABASE ##
+		define("DB_USERNAME_r", "root"); 
+		define("DB_PASSWORD_r", "root");
+
+		$db_conn = mysqli_connect(DB_SERVER, DB_USERNAME_r, DB_PASSWORD_r);
+
+		$db_name = "db_" . $_POST["username"];
+		$db_user = $_POST["username"];
+		$db_password = $_POST["password1"];
+
+		$queries = array(
+			"CREATE DATABASE `$db_name` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;",
+			"CREATE USER '$db_user'@'%' IDENTIFIED BY PASSWORD('$db_password');",
+			"GRANT USAGE ON $db_name.* TO '$db_user'@'%' IDENTIFIED BY '$db_password' WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;",
+			"GRANT SELECT , INSERT , UPDATE, DELETE, CREATE , DROP ON `$db_name`.* TO '$db_user'@'%';",
+			"FLUSH PRIVILEGES;"
+		);
+
+		foreach($queries as $query) {
+			mysqli_query($db_conn, $query);
+		}
 	}
 ?>

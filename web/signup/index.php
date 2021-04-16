@@ -1,6 +1,10 @@
 <?php
 	session_start();
 
+	error_reporting(E_ALL);
+	ini_set('display_errors', TRUE);
+	ini_set('display_startup_errors', TRUE);
+
 	## DATABASE ##
 	define("DB_SERVER", "localhost");
 	// this user only has privileges to insert and select data from users database
@@ -12,7 +16,6 @@
 
 	## INCLUDES ##
 	include("../funcs.php");
-	include("../create_db.php");
 ?>
 <!DOCTYPE html>
 <html>
