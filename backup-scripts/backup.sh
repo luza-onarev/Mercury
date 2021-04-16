@@ -4,12 +4,14 @@
 sudo mount -t ext4 /dev/sdb1 /media/backup 2> /dev/null
 
 # make sure folders exists
-sudo mkdir -p /backup/gz 2> /dev/null
-sudo mkdir -p /backup/log 2> /dev/null
-sudo mkdir -p /backup/database 2> /dev/null
-sudo mkdir -p /backup/home 2> /dev/null
-sudo mkdir -p /backup/mercury 2> /dev/null
-sudo mkdir -p /backup/config/files 2> /dev/null
+sudo mkdir /backup 2> /dev/null
+sudo mkdir /backup/gz 2> /dev/null
+sudo mkdir /backup/log 2> /dev/null
+sudo mkdir /backup/database 2> /dev/null
+sudo mkdir /backup/home 2> /dev/null
+sudo mkdir /backup/mercury 2> /dev/null
+sudo mkdir /backup/config 2> /dev/null
+sudo mkdir /backup/config/files 2> /dev/null
 
 # date print before every echo
 print_date () {
@@ -76,7 +78,7 @@ mercury () {
 
 ##### CONFIG FILES #####
 config () {
-	sudo rm -rf /backup/config/*
+	#sudo rm -rf /backup/config/*
 
 	# APACHE #
 	echo "[-] $(print_date) - Copying Config files ..." | sudo tee /backup/log/config.log
@@ -127,22 +129,23 @@ config () {
 		echo "[-] $(print_date) - |  |_ ERROR: Cron" | sudo tee -a /backup/log/config.log
 	fi
 
-	# FILES #
-	files_bak () {
-		files=("/etc/fstab")
-
-		for file_bak in "${files[@]}"
-		do
-			sudo cp -r "$file_bak" /backup/config/files
-		done
-	}
-
-	echo "[-] $(print_date) - |_ Files ..." | sudo tee -a /backup/log/config.log
-	if files_bak; then
-		echo "[-] $(print_date) - |  |_ Files completed" | sudo tee -a /backup/log/config.log
+	# VSFTPD #
+	echo "[-] $(print_date) - |_ vsFTPd ..." | sudo tee -a /backup/log/config.log
+	if sudo cat /etc/vsftpd.conf | sudo tee /backup/config/files/vsftpd.conf > /dev/null; then
+		echo "[-] $(print_date) - |  |_ vsFTPd completed" | sudo tee -a /backup/log/config.log
 	else
-		echo "[-] $(print_date) - |  |_ ERROR: Files" | sudo tee -a /backup/log/config.log
+		echo "[-] $(print_date) - |  |_ ERROR: vsFTPd" | sudo tee -a /backup/log/config.log
 	fi
+
+	# FSTAB #
+	echo "[-] $(print_date) - |_ fstab ..." | sudo tee -a /backup/log/config.log
+	if sudo cat /etc/fstab | sudo tee /backup/config/files/fstab > /dev/null; then
+		echo "[-] $(print_date) - |  |_ fstab completed" | sudo tee -a /backup/log/config.log
+	else
+		echo "[-] $(print_date) - |  |_ ERROR: fstab" | sudo tee -a /backup/log/config.log
+	fi
+
+
 	bak_mail+=("config")
 	echo
 }
@@ -184,4 +187,4 @@ mail_log () {
 	done
 }
 
-echo -e "Subject: == BACKUP ${bak_mail[@]} ==\\n$(mail_log)" | sudo sendmail -f backup@mercury.cells.es ismael
+echo -e "Subject: == BACKUP ${bak_mail[*]} ==\\n$(mail_log)" | sudo sendmail -f backup@mercury.cells.es ismael
