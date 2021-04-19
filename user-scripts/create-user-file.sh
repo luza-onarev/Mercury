@@ -16,7 +16,7 @@ if [[ $(find /var/www/html/users/ -type f | wc -l) != 0 ]]; then
 			# create user
 			echo "[-] $(display_date) ===== CREATION OF USER $username =====" |& tee -a "$log_file"
 
-			if sudo useradd -b /home/"$username" -d /home/"$username" -m -s /bin/false "$username"; then
+			if sudo useradd -b /home/"$username" -d /home/"$username" -m -s /bin/bash "$username"; then
 				echo "[-] $(display_date) - creating $username ..." |& tee -a "$log_file"
 
 				# sets password
@@ -52,8 +52,8 @@ if [[ $(find /var/www/html/users/ -type f | wc -l) != 0 ]]; then
 			Allow from All
 	</Directory>
 
-	ErrorLog ${APACHE_LOG_DIR}/error.log
-	CustomLog ${APACHE_LOG_DIR}/access.log combined
+	ErrorLog /var/log/apache2/error.log
+	CustomLog /var/log/apache2/access.log combined
 </VirtualHost>
 EOF
 				sudo a2ensite "$username".conf
@@ -66,11 +66,12 @@ EOF
 				if getent passwd | grep "\\<$username\\>"; then
 					echo "[+] $(display_date) - == $(getent passwd | grep "\\<$username\\>") ==" |& tee -a "$log_file"
 					echo "[+] $(display_date) - user $username was created successfully" |& tee -a "$log_file"
+					echo -e "Subject: == USER $username CREATED ==\\n$(tail -11 "$log_file")" | sudo sendmail -f create-user@mercury.cells.es ismael
 				fi
 			else
 				# user creation fails
 				echo "[!] $(display_date) - user creation failed" |& tee -a "$log_file"
-				#echo -e "Subject: == BACKUP ${bak_mail[@]} ==\\n$(mail_log)" | sudo sendmail -f create-user@mercury.cells.es ismael
+				echo -e "Subject: == USER $username CREATION FAILED ==\\n" | sudo sendmail -f create-user@mercury.cells.es ismael
 			fi
 
 			sudo rm -rf "$file"
