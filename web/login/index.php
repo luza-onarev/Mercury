@@ -49,22 +49,28 @@
 						switch ($_GET["redi"]) {
 							case 'no_auth':
 								echo '<div class="error-signup">';
-							    echo "You must log in first!<br>";
-							    echo "</div>";
+								echo "You must log in first!<br>";
+								echo "</div>";
 								break;
 
 							case 'logout':
 								echo '<div class="succ-signup">';
-							    echo "Successfully logged out!<br>";
-							    echo "</div>";
+								echo "Successfully logged out!<br>";
+								echo "</div>";
 								break;
 
 							case 'pass_change':
 								echo '<div class="succ-signup">';
-							    echo "Log in again with new password!<br>";
-							    echo "</div>";
+								echo "Log in again with new password!<br>";
+								echo "</div>";
 								break;
-						}						
+
+							case 'acc_del':
+								echo '<div class="succ-signup">';
+								echo "Account successfully deleted!<br>";
+								echo "</div>";
+								break;
+						}
 					}
 
 					$_POST = array();

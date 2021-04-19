@@ -68,6 +68,10 @@
 
 			<?php
 				if (isset($_POST["delete_account"])) {
+					if (delete_user($_SESSION["username"])) {
+						session_destroy();
+						header("Location: /login?redi=acc_del");
+					}
 				}
 			?>
 		</div>

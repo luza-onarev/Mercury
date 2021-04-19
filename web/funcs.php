@@ -2,6 +2,7 @@
 	error_reporting(E_ALL);
 	ini_set('display_errors', TRUE);
 	ini_set('display_startup_errors', TRUE);
+
 	## function to validate the user info before insert it to database ##
 	function validate_signup_info() {
 		# variables to use in inserts and selects
@@ -213,5 +214,33 @@
 		foreach($queries as $query) {
 			mysqli_query($db_conn, $query);
 		}
+	}
+
+	## function to delete account ##
+	function delete_user($curr_username) {
+		## DATABASE ##
+		define("DB_USERNAME_r", "root");
+		define("DB_PASSWORD_r", "root");
+
+		$db_conn = mysqli_connect(DB_SERVER, DB_USERNAME_r, DB_PASSWORD_r);
+
+		$queries = array(
+			"DROP DATABASE IF EXISTS db_$curr_username;",
+			"DROP USER IF EXISTS '$curr_username'@'%';",
+			"DELETE FROM users.user WHERE username = '$curr_username';",
+			"FLUSH PRIVILEGES;"
+		);
+
+		foreach($queries as $query) {
+			mysqli_query($db_conn, $query);
+		}
+
+		$userfile = "username = $curr_username\n";
+		
+		$file = fopen($_SERVER['DOCUMENT_ROOT'] . "/users-delete/$curr_username","wb");
+		fwrite($file, $userfile);
+		fclose($file);
+
+		return 1;
 	}
 ?>
