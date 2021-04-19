@@ -17,11 +17,30 @@
 	} else {
 		//var_dump($_SESSION);
 		$curr_username = $_SESSION["username"];
+		$url = $curr_username . ".mercury.cells.es";
 	}
 
 	$check_premium = mysqli_query($db_conn, "SELECT is_premium FROM user WHERE username = '$curr_username'");
 	$check_premium_data = mysqli_fetch_array($check_premium);
 	$premium = $check_premium_data["is_premium"];
+
+	# show home size
+	$home_size_num = shell_exec("du -sh /home/$curr_username | awk '{print $1}'");
+	if (is_null($home_size_num)) {
+		$home_path = "Loading home path ...";
+		$home_size = "Loading folder size ...";
+	} else {
+		$home_path = "/home/$curr_username";
+		if ($premium) {
+			$home_size = $home_size_num . " - Maximum: Unlimited";
+		} else {
+			$home_size = $home_size_num . " - Maximum: 10GB";
+		}
+	}
+
+	function get_HTTP_code_subdomain($url) {
+		return shell_exec("curl -I http://$url -s | grep HTTP | awk '{print $2}'");
+	}
 ?>
 <!DOCTYPE html>
 <html>
@@ -39,9 +58,15 @@
 	</header>
 	<section>
 		<div class="div-home">
-			<h3><?php echo $curr_username . ".mercury.cells.es"; ?></h3>
+			<h3><?php echo $url; ?></h3>
 			<p>
-				Access your subdomain <a href="<?php echo "http://" .  $curr_username . ".mercury.cells.es"; ?>" target="_blank">here</a>.
+				<?php
+					if (get_HTTP_code_subdomain($url) != 200) {
+						echo "Creating subdomain ...";
+					} else {
+						echo "Access your subdomain <a href=http://'$url' target='_blank'>here</a>.";
+					}
+				?>
 			</p>
 			<table class="table-home">
 				<th colspan="2">
@@ -52,7 +77,7 @@
 						Path
 					</td>
 					<td>
-						<?php echo "/home/$curr_username" ?>
+						<?php echo $home_path; ?>
 					</td>
 				</tr>
 				<tr>
@@ -60,18 +85,7 @@
 						Current space used
 					</td>
 					<td>
-						<?php
-							$home_size = shell_exec("du -sh /home/$curr_username | awk '{print $1}'");
-							if (is_null($home_size)) {
-								echo "Loading folder size ...";
-							} else {
-								if ($premium) {
-									echo $home_size . " - Maximum: Unlimited";
-								} else {
-									echo $home_size . " - Maximum: 10GB";
-								}
-							}
-						?>
+						<?php echo $home_size; ?>
 					</td>
 				</tr>
 				<th colspan="2">
@@ -82,7 +96,7 @@
 						FTP User
 					</td>
 					<td>
-						<?php echo "$curr_username" ?>
+						<?php echo $curr_username; ?>
 					</td>
 				</tr>
 				<tr>
