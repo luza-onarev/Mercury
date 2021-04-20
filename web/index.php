@@ -63,7 +63,7 @@
 			</tr>
 			<tr class="info-padd">
 				<td style="background-color: white;">
-					
+					<img src="/img/team.png" class="gif" align="top">
 				</td>
 				<td class="info-padd-h">
 					<h3>Support the project</h3>
