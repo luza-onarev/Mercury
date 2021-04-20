@@ -24,7 +24,7 @@
 			<tr class="info-padd">
 				<td class="info-padd">
 					<h3>Free Web hosting</h3>
-					Free sub domain to host your web pages. Up to 1 GB to host all your files.
+					Free sub domain to host your web pages. Up to 10 GB to host all your files.
 				</td>
 				<td class="info-padd">
 					<h3>Custom cPanel</h3>
