@@ -34,7 +34,7 @@
 		if ($premium) {
 			$home_size = $home_size_num . " - Maximum: Unlimited";
 		} else {
-			$home_size = $home_size_num . " - Maximum: 10GB";
+			$home_size = $home_size_num . " - Maximum: 10 GB";
 		}
 	}
 
@@ -64,7 +64,7 @@
 					if (get_HTTP_code_subdomain($url) != 200) {
 						echo "Creating subdomain ...";
 					} else {
-						echo "Access your subdomain <a href=http://'$url' target='_blank'>here</a>.";
+						echo "Access your subdomain <a href=http://$url target='_blank'>here</a>.";
 					}
 				?>
 			</p>
