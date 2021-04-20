@@ -8,7 +8,7 @@ log_file="/etc/user-scripts/log/delete-user.log"
 
 # read files created by PHP
 if [[ $(find /var/www/html/users-delete/ -type f | wc -l) != 0 ]]; then
-	# if new file exists, delete the user
+	# if file exists, delete the user
 	for file in $(find /var/www/html/users-delete/ -type f)
 		do
 			username=$(grep username "$file" | awk '{print $3}')
@@ -23,9 +23,11 @@ if [[ $(find /var/www/html/users-delete/ -type f | wc -l) != 0 ]]; then
 
 				# delete dns record
 				echo "[-] $(display_date) - deleting DNS record ..." |& tee -a "$log_file"
-				sudo grep -v $username.mercury.cells.es /etc/bind/db.mercury | sudo tee /etc/bind/db.mercury
+				sed /"$username".mercury.cells.es/d /etc/bind/db.mercury | sudo tee /tmp/dns
+				sudo cp /tmp/dns /etc/bind/db.mercury
 				# delete empty lines
-				sudo sed '/^$/d' /etc/bind/db.mercury | sudo tee /etc/bind/db.mercury
+				sudo sed '/^$/d' /etc/bind/db.mercury | sudo tee /tmp/dns
+				sudo cp /tmp/dns /etc/bind/db.mercury
 
 				# delete vhost
 				echo "[-] $(display_date) - deleting Apache2 virtual host ..." |& tee -a "$log_file"
@@ -35,18 +37,27 @@ if [[ $(find /var/www/html/users-delete/ -type f | wc -l) != 0 ]]; then
 
 				# restart services
 				echo "[-] $(display_date) - restarting DNS and Apache2 service ..." |& tee -a "$log_file"
-				sudo systemctl restart bind9.service apache2.service
+				if sudo systemctl restart bind9.service; then
+					echo "[-] $(display_date) - DNS server restarted" |& tee -a "$log_file"
+				else
+					echo "[-] $(display_date) - ERROR restarting DNS server" |& tee -a "$log_file"
+				fi
+				if sudo systemctl apache2.service; then
+					echo "[-] $(display_date) - Apache2 server restarted" |& tee -a "$log_file"
+				else
+					echo "[-] $(display_date) - ERROR restarting Apache2 server" |& tee -a "$log_file"
+				fi
 
 				echo "[+] $(display_date) - user $username was deleted successfully" |& tee -a "$log_file"
 
 				# send mail
-				echo -e "Subject: == USER $username DELETED ==\\n$(tail -8 "$log_file")" | sudo sendmail -f create-user@mercury.cells.es ismael
+				echo -e "Subject: == USER $username DELETED ==\\n$(tail -10 "$log_file")" | sudo sendmail -f create-user@mercury.cells.es ismael
 
 				# delete file
 				sudo rm -rf "$file"
 				echo "" |& tee -a "$log_file"
 			else
-				echo -e "Subject: == USER $username DELETION FAILED ==\\n$(cat $log_file)" | sudo sendmail -f delete-user@mercury.cells.es ismael
+				echo -e "Subject: == USER $username DELETION FAILED ==\\n$(tail -10 $log_file)" | sudo sendmail -f delete-user@mercury.cells.es ismael
 			fi
 		done
 else
