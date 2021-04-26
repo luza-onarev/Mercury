@@ -44,9 +44,9 @@ EOF
 <VirtualHost *:80>
 	ServerName $username.mercury.cells.es
 	ServerAdmin ismael@mercury.cells.es	
-	DocumentRoot /home/$username/public_html
+	DocumentRoot /home/$username
 
-	<Directory /home/$username/public_html>
+	<Directory /home/$username>
 			AllowOverride All
 			Order Allow,Deny
 			Allow from All
