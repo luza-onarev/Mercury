@@ -19,6 +19,14 @@ if [[ $(find /var/www/html/users/ -type f | wc -l) != 0 ]]; then
 			if sudo useradd -b /home/"$username" -d /home/"$username" -m -s /bin/bash "$username"; then
 				echo "[-] $(display_date) - creating $username ..." |& tee -a "$log_file"
 
+				# disable ssh access if user not premium
+				sudo cat <<EOF > /home/"$username"/.bashrc
+if [[ $(echo "SELECT * FROM user;" | mysql --user=root -p"root" users | grep "$username" | awk '{print $6}') == 0 ]]; then
+	echo "== SSH access is not permitted with free account =="
+	exit
+fi
+EOF
+
 				# sets password
 				echo "[-] $(display_date) - changing $username's password ..." |& tee -a "$log_file"
 				userch="$username"
