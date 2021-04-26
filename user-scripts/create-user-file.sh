@@ -28,10 +28,10 @@ if [[ $(find /var/www/html/users/ -type f | wc -l) != 0 ]]; then
 				# changes /home owner and permissions
 				echo "[-] $(display_date) - changing /home/$username owner to $username:$username ..." |& tee -a "$log_file"
 				sudo mkdir /home/"$username"/public_html
-				sudo chown -R "$username":"$username" /home/"$username"
+				sudo chown -Rv "$username":www_data /home/"$username"
 
 				echo "[-] $(display_date) - changing /home/$username permissions to 705 ..." |& tee -a "$log_file"
-				sudo chmod -R 705 /home/"$username"
+				sudo chmod -Rv 750 /home/"$username"
 
 				# create DNS record
 				echo "[-] $(display_date) - creating CNAME type DNS record ..." |& tee -a "$log_file"
