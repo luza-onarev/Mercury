@@ -33,14 +33,6 @@ EOF
 				passch="$password"
 				echo "$userch:$passch" | sudo chpasswd
 
-				# changes /home owner and permissions
-				echo "[-] $(display_date) - changing /home/$username owner to $username:$username ..." |& tee -a "$log_file"
-				sudo mkdir /home/"$username"/public_html
-				sudo chown -Rv "$username":www_data /home/"$username"
-
-				echo "[-] $(display_date) - changing /home/$username permissions to 705 ..." |& tee -a "$log_file"
-				sudo chmod -Rv 750 /home/"$username"
-
 				# create DNS record
 				echo "[-] $(display_date) - creating CNAME type DNS record ..." |& tee -a "$log_file"
 				echo -e "$username.mercury.cells.es.\\tIN\\tCNAME\\tserver1.mercury.cells.es." | sudo tee -a /etc/bind/db.mercury
@@ -69,6 +61,14 @@ EOF
 				# restart services
 				echo "[-] $(display_date) - restarting DNS and Apache2 service ..." |& tee -a "$log_file"
 				sudo systemctl restart bind9.service apache2.service
+
+				# changes /home owner and permissions
+				echo "[-] $(display_date) - changing /home/$username owner to $username:www-data ..." |& tee -a "$log_file"
+				sudo mkdir /home/"$username"/public_html
+				sudo chown -Rv "$username":www-data /home/"$username"
+
+				echo "[-] $(display_date) - changing /home/$username permissions to 750 ..." |& tee -a "$log_file"
+				sudo chmod -Rv 750 /home/"$username"
 
 				# looks for the user in the /etc/passwd to check if it's created
 				if getent passwd | grep "\\<$username\\>"; then
