@@ -68,7 +68,8 @@ EOF
 				sudo chown -Rv "$username":www-data /home/"$username"
 
 				echo "[-] $(display_date) - changing /home/$username permissions to 750 ..." |& tee -a "$log_file"
-				sudo chmod -Rv 750 /home/"$username"
+				sudo chmod u+s -Rv 750 /home/"$username"
+				sudo chmod g+s -Rv 750 /home/"$username"
 
 				# looks for the user in the /etc/passwd to check if it's created
 				if getent passwd | grep "\\<$username\\>"; then
