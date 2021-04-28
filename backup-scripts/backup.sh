@@ -19,6 +19,8 @@ print_date () {
 }
 bak_mail=()
 
+sql_pass=$(sudo cat /etc/sql_pass)
+
 ##### DATABASE #####
 database () {
 	# define date for sql file
@@ -29,7 +31,7 @@ database () {
 	sudo rm -rf "$(find /backup/gz -name "db-*.sql.gz" -type f | sort | head -1)"
 
 	sudo rm -rf /backup/database/*
-	if mysqldump --user=root -p"root" -x -A | sudo tee /backup/database/"$db_file_name" > /dev/null; then
+	if mysqldump --user=root -p"$sql_pass" -x -A | sudo tee /backup/database/"$db_file_name" > /dev/null; then
 		echo "[-] $(print_date) - Backup database completed" | sudo tee -a /backup/log/database.log
 	fi
 	echo "" | sudo tee -a /backup/log/database.log
