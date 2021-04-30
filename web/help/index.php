@@ -1,6 +1,11 @@
 <?php
 	session_start();
 	//var_dump($_SESSION);
+
+	# show php errors
+	error_reporting(E_ALL);
+	ini_set('display_errors', TRUE);
+	ini_set('display_startup_errors', TRUE);
 ?>
 <!DOCTYPE html>
 <html>

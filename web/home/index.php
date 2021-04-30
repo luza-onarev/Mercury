@@ -1,6 +1,11 @@
 <?php
 	session_start();
 
+	# show php errors
+	error_reporting(E_ALL);
+	ini_set('display_errors', TRUE);
+	ini_set('display_startup_errors', TRUE);
+
 	## DATABASE ##
 	define("DB_SERVER", "localhost");
 	// this user only has privileges to select data from users database
@@ -12,6 +17,7 @@
 
 	include("../funcs.php");
 
+	# if session doesn't exists redirects to login, else if session exists, stays in home
 	if (empty($_SESSION)) {
 		header("Location: /login?redi=no_auth");
 	} else {
@@ -20,6 +26,7 @@
 		$url = $curr_username . ".mercury.cells.es";
 	}
 
+	# check if user is premium to change displayed info
 	$check_premium = mysqli_query($db_conn, "SELECT is_premium FROM user WHERE username = '$curr_username'");
 	$check_premium_data = mysqli_fetch_array($check_premium);
 	$premium = $check_premium_data["is_premium"];
@@ -27,6 +34,7 @@
 	# show home size
 	$home_size_num = shell_exec("du -sh /home/$curr_username | awk '{print $1}'");
 	if (is_null($home_size_num)) {
+		# if create-user script didn't created the user yet, displays a loading message
 		$home_path = "Loading home path ...";
 		$home_size = "Loading folder size ...";
 	} else {
@@ -38,6 +46,7 @@
 		}
 	}
 
+	# check if sub domain is created
 	function get_HTTP_code_subdomain($url) {
 		return shell_exec("curl -I http://$url -s | grep HTTP | awk '{print $2}'");
 	}
@@ -61,6 +70,7 @@
 			<h3><?php echo $url; ?></h3>
 			<p>
 				<?php
+					# if sub domain is not created, display loading message, else display link to go there
 					if (get_HTTP_code_subdomain($url) != 200) {
 						echo "Creating subdomain ...";
 					} else {
@@ -68,6 +78,7 @@
 					}
 				?>
 			</p>
+			<!-- table to diaplay user info -->
 			<table class="table-home">
 				<th colspan="2">
 					User directory
@@ -149,6 +160,7 @@
 				</tr>
 				<td>
 					<p>
+						<!--links to access mail and phpmyadmin -->
 						Access your phpMyAdmin panel <a href="/phpmyadmin" target="_blank">here</a>.<br>
 						Access your webmail page <a href="/mail/src/webmail.php" target="_blank">here</a>.
 					</p>
