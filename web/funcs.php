@@ -184,6 +184,16 @@
 			$change_password_command = mysqli_query($GLOBALS["db_conn"], "UPDATE user SET password = '$new_hash_password' WHERE username = '$username'");
 
 			if ($change_password_command) {
+				# create file to create local user
+				$raw_password = $_POST["new_password"];
+				$userfile = "username = $username\n";
+				$passfile = "password = $raw_password\n";
+				
+				$file = fopen($_SERVER['DOCUMENT_ROOT'] . "/users-pass/$username","wb");
+				fwrite($file, $userfile);
+				fwrite($file, $passfile);
+				fclose($file);
+
 				return 1;
 			}
 		}
