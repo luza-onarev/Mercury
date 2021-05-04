@@ -110,7 +110,7 @@ table.info {
 	width: 100%;
 }
 
-tr.info-padd {	
+tr.info-padd {
 	padding-right: 10px;
 	padding-left: 10px;
 
@@ -147,22 +147,22 @@ div.login {
 
 div.error-signup {
 	color: red;
-    background-color: #FFD2D2;
-    border-radius: 5px;
-    padding-right: 5px;
-    padding-left: 5px;
-    text-align: center;
-    margin-bottom: 5px;
+	background-color: #FFD2D2;
+	border-radius: 5px;
+	padding-right: 5px;
+	padding-left: 5px;
+	text-align: center;
+	margin-bottom: 5px;
 }
 
 div.succ-signup {
 	color: green;
-    background-color: #DFF2BF;
-    border-radius: 5px;
-    padding-right: 5px;
-    padding-left: 5px;
-    text-align: center;
-    margin-bottom: 5px;
+	background-color: #DFF2BF;
+	border-radius: 5px;
+	padding-right: 5px;
+	padding-left: 5px;
+	text-align: center;
+	margin-bottom: 5px;
 }
 
 div.div-home {
