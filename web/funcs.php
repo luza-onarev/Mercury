@@ -132,11 +132,9 @@
 				} else {
 					echo '<div class="error-signup">';
 					echo "User is disabled!<br>";
-					echo "Contact the System Administrator<br>to get more help!<br>";
-					# TODO: word "help" should redirect to help page on how to contact a sys admin
+					echo "Contact a System Administrator<br>to get more <a href='/help/#contact_sys-admin' target='_blank'>help</a>!<br>";
 					echo "</div>";
 					$valid_login = 0;
-
 					# if user is disabled ends function and skips the remaining checks
 					return 0;
 				}

@@ -1,6 +1,5 @@
 <?php
 	session_start();
-	//var_dump($_SESSION);
 
 	# show php errors
 	error_reporting(E_ALL);
@@ -10,7 +9,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Login | MERCURY HOSTING</title>
+	<title>Help | MERCURY HOSTING</title>
 	<?php
 		include("../head.html");
 	?>
@@ -26,6 +25,9 @@
 		?>
 	</header>
 	<section>
+		<h1>Mercury's help page</h1>
+		<h2 id="contact_sys-admin">Contact a sysadmin</h2>
+		To contact a System Administrator send a mail to <a href="mailto:ismael@mercury.cells.es">ismael</a>
 	</section>
 	<footer>
 		<?php
