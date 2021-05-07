@@ -25,7 +25,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Login | MERCURY HOSTING</title>
+	<title>Log In | MERCURY HOSTING</title>
 	<?php
 		include("../head.html");
 	?>
@@ -37,7 +37,7 @@
 		?>
 	</header>
 	<section>
-		<h3>Login to you account</h3>
+		<h3>Log In to your account</h3>
 		<div class="login">
 			<!-- login form -->
 			<form action="." method="POST">
