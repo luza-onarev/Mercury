@@ -52,7 +52,16 @@ EOF
 
 				# restart services
 				echo "[-] $(display_date) - restarting DNS and Apache2 service ..." |& tee -a "$log_file"
-				sudo systemctl restart bind9.service apache2.service
+				if sudo systemctl reload bind9.service; then
+					echo "[-] $(display_date) - DNS server restarted" |& tee -a "$log_file"
+				else
+					echo "[-] $(display_date) - ERROR restarting DNS server" |& tee -a "$log_file"
+				fi
+				if sudo systemctl reload apache2.service; then
+					echo "[-] $(display_date) - Apache2 server restarted" |& tee -a "$log_file"
+				else
+					echo "[-] $(display_date) - ERROR restarting Apache2 server" |& tee -a "$log_file"
+				fi
 
 				# changes /home owner and permissions
 				echo "[-] $(display_date) - changing /home/$username owner to $username:www-data ..." |& tee -a "$log_file"

@@ -37,12 +37,12 @@ if [[ $(find /var/www/html/users-delete/ -type f | wc -l) != 0 ]]; then
 
 				# restart services
 				echo "[-] $(display_date) - restarting DNS and Apache2 service ..." |& tee -a "$log_file"
-				if sudo systemctl restart bind9.service; then
+				if sudo systemctl reload bind9.service; then
 					echo "[-] $(display_date) - DNS server restarted" |& tee -a "$log_file"
 				else
 					echo "[-] $(display_date) - ERROR restarting DNS server" |& tee -a "$log_file"
 				fi
-				if sudo systemctl apache2.service; then
+				if sudo systemctl reload apache2.service; then
 					echo "[-] $(display_date) - Apache2 server restarted" |& tee -a "$log_file"
 				else
 					echo "[-] $(display_date) - ERROR restarting Apache2 server" |& tee -a "$log_file"
