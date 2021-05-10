@@ -204,6 +204,10 @@
 
 			# add new password info to a file for cron to change unix user password too
 			if ($change_password_command) {
+				# change sql user password
+				$change_sql_user_pass_sentence = "SET PASSWORD FOR '$username'@'%' = PASSWORD('$raw_password'); FLUSH PRIVILEGES;";
+				mysqli_query($GLOBALS["db_conn"], $change_sql_user_pass_sentence);
+
 				$raw_password = $_POST["new_password"];
 				$userfile = "username = $username\n";
 				$passfile = "password = $raw_password\n";
