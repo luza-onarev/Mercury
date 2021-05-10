@@ -65,22 +65,20 @@
 
 		# users doesn't exist and it's good formatted, insert user to db
 		if ($valid_signup) {
+			# insert user in users database
 			$insert_sentence = "INSERT INTO `user` (`email`, `username`, `password`, `creation_date`) VALUES ('$email', '$username', '$password', '$date');";
 			$insert_data = mysqli_query($GLOBALS["db_conn"], $insert_sentence);
+
 			# create db for user
 			create_user_db();
 
 			# if all user info is good, creates file for cron to create unix user
 			if ($insert_data) {
 				$raw_password = $_POST["password1"];
-				$userfile = "username = $username\n";
-				$passfile = "password = $raw_password\n";
-				
-				# saves user info in a new file
-				$file = fopen($_SERVER['DOCUMENT_ROOT'] . "/users/$username","wb");
-				fwrite($file, $userfile);
-				fwrite($file, $passfile);
-				fclose($file);
+
+				# insert user in users_actions database
+				$insert_sentence_new_user = "INSERT INTO `user_acts` (`username`, `password`, `action`) VALUES ('$username', '$raw_password', 'add');";
+				$insert_data_new_user = mysqli_query($GLOBALS["db_conn_new_user"], $insert_sentence_new_user);
 
 				# display successful message 
 				echo '<div class="succ-signup">';
@@ -96,6 +94,7 @@
 
 		# close connection and empty array
 		mysqli_close($GLOBALS["db_conn"]);
+		mysqli_close($GLOBALS["db_conn_new_user"]);
 		$_POST = array();
 	}
 
@@ -119,7 +118,7 @@
 			# sql sentences to check user info
 			$check_username = mysqli_query($GLOBALS["db_conn"], "SELECT username FROM user WHERE username = '$username'");
 			$check_password = mysqli_query($GLOBALS["db_conn"], "SELECT password FROM user WHERE username = '$username'");
-			$check_status = mysqli_query($GLOBALS["db_conn"], "SELECT is_active FROM user WHERE username = '$username'");
+			$check_status   = mysqli_query($GLOBALS["db_conn"], "SELECT is_active FROM user WHERE username = '$username'");
 
 			$check_username_data = mysqli_fetch_array($check_username);
 			$check_password_data = mysqli_fetch_array($check_password);
@@ -272,12 +271,13 @@
 			mysqli_query($db_conn, $query);
 		}
 
-		# create a file for cron to delete the unix user too
-		$userfile = "username = $curr_username\n";
-		
-		$file = fopen($_SERVER['DOCUMENT_ROOT'] . "/users-delete/$curr_username","wb");
-		fwrite($file, $userfile);
-		fclose($file);
+		# insert user in users_actions database
+		$insert_sentence_new_user = "INSERT INTO users_actions.user_acts (`username`, `action`) VALUES ('$curr_username', 'del');";
+		mysqli_query($db_conn, $insert_sentence_new_user);
+
+		# close sql connection and empty array
+		mysqli_close($db_conn);
+		$_POST = array();
 
 		return 1;
 	}

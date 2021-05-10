@@ -12,8 +12,10 @@
 	define("DB_USERNAME", "signup_user"); 
 	define("DB_PASSWORD", "usertoinsertdata");
 	define("DB_DATABASE", "users");
+	define("DB_DATABASE_new_user", "users_actions");
 
 	$db_conn = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
+	$db_conn_new_user = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE_new_user);
 
 	## INCLUDES ##
 	include("../funcs.php");
