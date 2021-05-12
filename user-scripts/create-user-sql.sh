@@ -5,6 +5,7 @@ display_date() {
 }
 
 log_file="/etc/user-scripts/log/create-user.log"
+sql_pass=$(sudo cat /etc/sql_login_user_pass)
 
 # read entries from users_actions
 while read -r line
@@ -89,4 +90,4 @@ EOF
 	fi
 
 	echo "" |& tee -a "$log_file"
-done < <(echo "select username,password from user_acts where action = 'add'" | mysql -u root -p"$(cat /etc/sql_pass)" users_actions | tail -n +2)
+done < <(echo "SELECT username,password FROM user_acts WHERE action = 'add'" | mysql -u login_user -p"$sql_pass" users_actions | tail -n +2)

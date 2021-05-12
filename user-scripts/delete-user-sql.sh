@@ -4,15 +4,8 @@ display_date() {
 	date "+%H:%M:%S %d/%m/%Y"
 }
 
-log_file="/etc/user-scripts/log/delete-user.log"
-
-#!/bin/bash
-
-display_date() {
-	date "+%H:%M:%S %d/%m/%Y"
-}
-
 log_file="/etc/user-scripts/log/create-user.log"
+sql_pass=$(sudo cat /etc/sql_login_user_pass)
 
 # read entries from users_actions
 while read -r line
@@ -68,4 +61,4 @@ do
 	else
 		echo -e "Subject: == USER $username DELETION FAILED ==\\n$(tail -11 $log_file)" | sudo sendmail -f delete-user@mercury.cells.es ismael
 	fi
-done < <(echo "select username from user_acts where action = 'del'" | mysql -u root -p"$(cat /etc/sql_pass)" users_actions | tail -n +2)
+done < <(echo "SELECT username FROM user_acts WHERE action = 'del'" | mysql -u login_user -p"$sql_pass" users_actions | tail -n +2)
