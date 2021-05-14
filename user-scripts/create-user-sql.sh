@@ -5,11 +5,10 @@ display_date() {
 }
 
 log_file="/etc/user-scripts/log/create-user.log"
-sql_pass=$(sudo cat /etc/sql_login_user_pass)
+sql_pass=$(sudo cat /etc/sql_root_pass)
 
 # read entries from users_actions
-while read -r line
-do
+while read -r line; do
 	username=$(echo "$line" | awk '{print $1}')
 	password=$(echo "$line" | awk '{print $2}')
 
@@ -80,7 +79,9 @@ EOF
 		if getent passwd | grep "\\<$username\\>"; then
 			echo "[+] $(display_date) - == $(getent passwd | grep "\\<$username\\>") ==" |& tee -a "$log_file"
 			echo "[+] $(display_date) - user $username was created successfully" |& tee -a "$log_file"
-			echo -e "Subject: == USER $username CREATED ==\\n$(tail -12 "$log_file")" | sudo sendmail -f create-user@mercury.cells.es ismael
+			echo -e "Subject: == USER $username CREATED ==\\n$(tail -13 "$log_file")" | sudo sendmail -f create-user@mercury.cells.es ismael
+			# delete sql entry once user is created
+			echo "DELETE FROM user_acts WHERE username = '$username';" | mysql -u root -p"$sql_pass" users_actions
 		fi
 
 	else
@@ -90,4 +91,4 @@ EOF
 	fi
 
 	echo "" |& tee -a "$log_file"
-done < <(echo "SELECT username,password FROM user_acts WHERE action = 'add'" | mysql -u login_user -p"$sql_pass" users_actions | tail -n +2)
+done < <(echo "SELECT username,password FROM user_acts WHERE action = 'add'" | mysql -u root -p"$sql_pass" users_actions | tail -n +2)
