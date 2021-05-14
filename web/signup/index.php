@@ -52,7 +52,8 @@
 					$_POST = array();
 				?>
 				<p class="already_acc">
-					Already have an account?<br>Click <a href="/login">here</a> to log in.
+					Already have an account?<br>
+					Click <a href="/login">here</a> to log in.
 				</p>
 			</form>
 		</div>
