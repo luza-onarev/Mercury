@@ -58,7 +58,7 @@
 				<?php
 				# if users writes new password, change_password function runs to check if current and new password is valid and changes it
 				if (isset($_POST["change_password"])) {
-					if (change_password($_POST["curr_password"], $_POST["new_password"], $_POST["new_password2"])) {
+					if (change_password($curr_username, $_POST["curr_password"], $_POST["new_password"], $_POST["new_password2"])) {
 						# delete session and redirect to login page
 						session_destroy();
 	    				header("Location: /login?redi=pass_change");
@@ -79,7 +79,7 @@
 			<?php
 				# if user presses the delete account button, delete_user function runs and deletes sql user, unix user and all home's content
 				if (isset($_POST["delete_account"])) {
-					if (delete_user($_SESSION["username"])) {
+					if (delete_user($curr_username)) {
 						# delete session and redirect to login page
 						session_destroy();
 						header("Location: /login?redi=acc_del");
