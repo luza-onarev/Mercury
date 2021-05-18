@@ -19,9 +19,9 @@ print_date () {
 }
 bak_mail=()
 
-sql_pass=$(sudo cat /etc/sql_pass)
+sql_pass=$(sudo cat /etc/sql_root_pass)
 
-##### DATABASE #####
+# DATABASE #
 database () {
 	# define date for sql file
 	db_file_name="db-$(date '+%Y-%m-%d--%T').sql"
@@ -31,7 +31,7 @@ database () {
 	sudo rm -rf "$(find /backup/gz -name "db-*.sql.gz" -type f | sort | head -1)"
 
 	sudo rm -rf /backup/database/*
-	if mysqldump --user=root -p"$sql_pass" -x -A | sudo tee /backup/database/"$db_file_name" > /dev/null; then
+	if mysqldump -u root -p"$sql_pass" --all-databases | sudo tee /backup/database/"$db_file_name" > /dev/null; then
 		echo "[-] $(print_date) - Backup database completed" | sudo tee -a /backup/log/database.log
 	fi
 	echo "" | sudo tee -a /backup/log/database.log
@@ -45,7 +45,7 @@ database () {
 	echo
 }
 
-##### HOME #####
+# HOME #
 home () {
 	echo "[-] $(print_date) - Copying /home ..." | sudo tee /backup/log/home.log
 	if sudo cp -r /home /backup/home/; then
@@ -61,7 +61,7 @@ home () {
 	echo
 }
 
-##### MERCURY #####
+# MERCURY #
 mercury () {
 	echo "[-] $(print_date) - Copying Mercury ..." | sudo tee /backup/log/mercury.log
 	if sudo cp -r /var/www/html /backup/mercury/; then
@@ -78,10 +78,8 @@ mercury () {
 	echo
 }
 
-##### CONFIG FILES #####
+# CONFIG FILES #
 config () {
-	#sudo rm -rf /backup/config/*
-
 	# APACHE #
 	echo "[-] $(print_date) - Copying Config files ..." | sudo tee /backup/log/config.log
 	echo "[-] $(print_date) - |_ Apache ..." | sudo tee -a /backup/log/config.log
@@ -152,7 +150,7 @@ config () {
 	echo
 }
 
-##### SCRIPT #####
+## SCRIPT ##
 if [[ "$#" == 0 ]] || [[ "$1" == "all" ]]; then
 	database
 	home
