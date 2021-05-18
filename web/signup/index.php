@@ -46,10 +46,9 @@
 				<?php
 					if (isset($_POST["email"]) AND !empty($_POST["email"])) {
 						if (validate_signup_info()) {
-							$_SESSION["username"] = $_POST["username"];
+							header("Location: /login?redi=new_acc");
 						}
 					}
-					$_POST = array();
 				?>
 				<p class="already_acc">
 					Already have an account?<br>

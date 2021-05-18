@@ -85,16 +85,11 @@
 				echo "Access your control panel <a href='/home'>here</a>!";
 				echo "</div>";
 
-				return 1;
+				return true;
 			} else {
 				echo mysqli_error($GLOBALS["db_conn"]);
 			}
 		}
-
-		# close connection and empty array
-		mysqli_close($GLOBALS["db_conn"]);
-		mysqli_close($GLOBALS["db_conn_new_user"]);
-		$_POST = array();
 	}
 
 	// function to validate login //
@@ -160,20 +155,23 @@
 				return 1;
 			}
 		}
-
-		# close sql connection and empty array
-		mysqli_close($GLOBALS["db_conn"]);
-		$_POST = array();
 	}
 
 	// function to change user's password //
-	function change_password($curr_username, $curr_password, $new_password, $new_password2) {
+	function change_password($username, $password, $new_password, $new_password2) {
+		## DATABASE ##
+		define("DB_SERVER_cha", "localhost");
+		define("DB_USERNAME_cha", "root");
+		define("DB_PASSWORD_cha", "root");
+
+		$db_conn = mysqli_connect(DB_SERVER_cha, DB_USERNAME_cha, DB_PASSWORD_cha);
+
 		$change_password = 1;
 		# encrypt password to compare it with user's password
-		$curr_hash_password = hash('sha256', $curr_password);
+		$curr_hash_password = hash('sha256', $password);
 
 		# sql sentences to check current password 
-		$check_curr_password = mysqli_query($GLOBALS["db_conn"], "SELECT password FROM user WHERE username = '$curr_username'");
+		$check_curr_password = mysqli_query($db_conn, "SELECT password FROM users.user WHERE username = '$username'");
 		$check_curr_password_data = mysqli_fetch_array($check_curr_password);
 
 		# user writes an invalid current password
@@ -198,33 +196,40 @@
 			$new_hash_password = hash('sha256', $new_password);
 			
 			# sql sentence to change password from db
-			$change_password_command = mysqli_query($GLOBALS["db_conn"], "UPDATE user SET password = '$new_hash_password' WHERE username = '$curr_username'");
+			$change_password_command = mysqli_query($db_conn, "UPDATE users.user SET password = '$new_hash_password' WHERE username = '$username'");
 
 			# add new password info to a file for cron to change unix user password too
 			if ($change_password_command) {
 				# change sql user password
-				$change_sql_user_pass_sentence = "SET PASSWORD FOR '$curr_username'@'%' = PASSWORD('$new_password'); FLUSH PRIVILEGES;";
-				mysqli_query($GLOBALS["db_conn"], $change_sql_user_pass_sentence);
+				$change_sql_user_pass_sentence = "SET PASSWORD FOR '$username'@'%' = PASSWORD('$new_password'); FLUSH PRIVILEGES;";
+				if (mysqli_query($db_conn, $change_sql_user_pass_sentence)) {
+					$cha_status = 1;
+				} else {
+					$cha_status = 0;
+				}
 
-				$change_unix_user_pass_sentence = "INSERT INTO users_actions.user_acts (`username`, `password`, `action`) VALUES ('$curr_username', '$new_password', 'cha');";
-				mysqli_query($GLOBALS["db_conn"], $change_unix_user_pass_sentence);
+				$change_unix_user_pass_sentence = "INSERT INTO users_actions.user_acts (`username`, `password`, `action`) VALUES ('$username', '$new_password', 'cha');";
+				if (mysqli_query($db_conn, $change_unix_user_pass_sentence)) {
+					$cha_status = 1;
+				} else {
+					$cha_status = 0;
+				}
 
-				return 1;
+				if ($cha_status == 1) {
+					return true;
+				}
 			}
 		}
-
-		# close connection and empty array
-		mysqli_close($GLOBALS["db_conn"]);
-		$_POST = array();
 	}
 
 	// function to create new db with user's name //
 	function create_user_db() {
 		## DATABASE ##
-		define("DB_USERNAME_r", "root"); 
-		define("DB_PASSWORD_r", "root");
+		define("DB_SERVER_add", "localhost");
+		define("DB_USERNAME_add", "root"); 
+		define("DB_PASSWORD_add", "root");
 
-		$db_conn = mysqli_connect(DB_SERVER, DB_USERNAME_r, DB_PASSWORD_r);
+		$db_conn = mysqli_connect(DB_SERVER_add, DB_USERNAME_add, DB_PASSWORD_add);
 
 		$db_name = "db_" . $_POST["username"];
 		$db_user = $_POST["username"];
@@ -241,46 +246,50 @@
 
 		# run all sql sentences from $queries array
 		foreach($queries as $query) {
-			mysqli_query($db_conn, $query);
+			if (mysqli_query($db_conn, $query)) {
+				$add_status = 1;
+			} else {
+				echo mysqli_query($db_conn, $query);
+				$add_status = 0;
+			}
 		}
 
-		# close sql connection and empty array
-		mysqli_close($db_conn);
-		$_POST = array();
-
-		return 1;
+		if ($add_status == 1) {
+			return true;
+		}
 	}
 
 	// function to delete users //
-	function delete_user($curr_username) {
+	function delete_user($username) {
 		## DATABASE ##
-		define("DB_SERVER", "localhost");
+		define("DB_SERVER_del", "localhost");
 		# this user only has privileges to select, drop, delete and insert on all databases
-		define("DB_USERNAME", "action_user"); 
-		define("DB_PASSWORD", "usertodoactions");
+		define("DB_USERNAME_del", "action_user"); 
+		define("DB_PASSWORD_del", "usertodoactions");
 
-		$db_conn = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD);
+		$db_conn = mysqli_connect(DB_SERVER_del, DB_USERNAME_del, DB_PASSWORD_del);
 
 		# sql sentences to delete db user and db
 		$queries = array(
-			"DROP DATABASE IF EXISTS db_$curr_username;",
-			"DROP USER IF EXISTS '$curr_username'@'%';",
-			"USE users;",
-			"DELETE FROM user WHERE username = '$curr_username';",
-			"USE users_actions;",
-			"INSERT INTO user_acts (`username`, `action`) VALUES ('$curr_username', 'del');",
+			"DROP DATABASE IF EXISTS db_$username;",
+			"DROP USER IF EXISTS '$username'@'%';",
+			"DELETE FROM users.user WHERE username = '$username';",
+			"INSERT INTO users_actions.user_acts (`username`, `action`) VALUES ('$username', 'del');",
 			"FLUSH PRIVILEGES;"
 		);
 
 		# run all sql sentences from $queries array
 		foreach($queries as $query) {
-			mysqli_query($db_conn, $query);
+			if (mysqli_query($db_conn, $query)) {
+				$del_status = 1;
+			} else {
+				echo mysqli_query($db_conn, $query);
+				$del_status = 0;
+			}
 		}
 
-		# close sql connection and empty array
-		mysqli_close($db_conn);
-		$_POST = array();
-
-		return 1;
+		if ($del_status == 1) {
+			return true;
+		}
 	}
 ?>

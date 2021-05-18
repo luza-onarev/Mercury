@@ -56,6 +56,13 @@
 					# if get variable exists and it's not empty, display different boxes with a message with the reason of the login redirection
 					if (isset($_GET["redi"]) AND !empty($_GET["redi"])) {
 						switch ($_GET["redi"]) {
+							# user creates account
+							case 'new_acc':
+								echo '<div class="succ-signup">';
+								echo "Log in with new account created!<br>";
+								echo "</div>";
+								break;
+
 							# user tries to go to home before logging in
 							case 'no_auth':
 								echo '<div class="error-signup">';
