@@ -33,18 +33,22 @@ while read -r line; do
 		
 		sudo cat <<EOF > /etc/apache2/sites-available/"$username".conf
 <VirtualHost *:80>
-ServerName $username.mercury.cells.es
-ServerAdmin ismael@mercury.cells.es	
-DocumentRoot /home/$username/public_html
+	ServerName $username.mercury.cells.es
+	ServerAdmin ismael@mercury.cells.es	
+	DocumentRoot /home/$username/public_html
 
-<Directory /home/$username/public_html>
-	AllowOverride All
-	Order Allow,Deny
-	Allow from All
-</Directory>
+	<Directory /home/$username/public_html>
+		RewriteEngine on
+		AllowOverride All
+		Order Allow,Deny
+		Allow from All
+		php_admin_flag engine on
+		php_admin_flag engine on
+		AddType application/x-httpd-php .php
+	</Directory>
 
-ErrorLog /var/log/apache2/error.log
-CustomLog /var/log/apache2/access.log combined
+	ErrorLog /var/log/apache2/error.log
+	CustomLog /var/log/apache2/access.log combined
 </VirtualHost>
 EOF
 		sudo a2ensite "$username".conf
