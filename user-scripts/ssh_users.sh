@@ -17,9 +17,15 @@ for db_user in $(echo "SELECT username FROM user;" | mysql -u root -p"$sql_pass"
 	else
 		echo "user $db_user is NOT premium"
 		if sudo deluser "$db_user" ssh_users 2> /dev/null; then
+
+			for pid in $(sudo ps aux | grep sshd | grep "$db_user"@pts | awk '{print $2}'); do	
+				echo "[-] killing connection user: $db_user -- pid: $pid"
+				sudo kill -9 "$pid"
+			done
+
 			echo "[-] $(display_date) - user $db_user removed from ssh_users group" |& tee -a "$log_file"
 		fi
 	fi
 done
 
-echo "ssh_users: $(cat /etc/group | grep ssh_users | awk -F ":" '{print $4}')"
+echo "ssh_users: $(sudo cat /etc/group | grep ssh_users | awk -F ":" '{print $4}')"
