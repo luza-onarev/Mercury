@@ -43,7 +43,6 @@ while read -r line; do
 		Order Allow,Deny
 		Allow from All
 		php_admin_flag engine on
-		php_admin_flag engine on
 		AddType application/x-httpd-php .php
 	</Directory>
 
