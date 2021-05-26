@@ -73,6 +73,9 @@ EOF
 		echo "[-] $(display_date) - changing /home/$username permissions to 750 ..." |& tee -a "$log_file"
 		sudo chmod u+s -Rv 750 /home/"$username"
 		sudo chmod g+s -Rv 750 /home/"$username"
+		
+		sudo chmod u+w -Rv 750 /home/"$username"
+		sudo chmod g+w -Rv 750 /home/"$username"
 
 		# delete sql entry once user created
 		echo "[!] $(display_date) - deleting user entry from users_actions.user_acts ..." |& tee -a "$log_file"
