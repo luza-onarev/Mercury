@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # make sure folder is mounted
-sudo mount -t ext4 /dev/sdb1 /media/backup 2> /dev/null
+sudo mount -t ext4 /dev/sdb1 /backup 2> /dev/null
 
 # make sure folders exists
 sudo mkdir /backup 2> /dev/null
@@ -28,9 +28,8 @@ database () {
 
 	echo "[-] $(print_date) - Backuping database ..." | sudo tee /backup/log/database.log
 	# delete fist sql from directory
-	sudo rm -rf "$(find /backup/gz -name "db-*.sql.gz" -type f | sort | head -1)"
+	sudo rm -rfv "$(find /backup/gz -name "db-*.sql.gz" -type f | sort | head -1)"
 
-	sudo rm -rf /backup/database/*
 	if mysqldump -u root -p"$sql_pass" --all-databases | sudo tee /backup/database/"$db_file_name" > /dev/null; then
 		echo "[-] $(print_date) - Backup database completed" | sudo tee -a /backup/log/database.log
 	fi

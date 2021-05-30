@@ -5,7 +5,7 @@ display_date() {
 }
 
 log_file="/etc/user-scripts/log/create-user.log"
-sql_pass=$(sudo cat /etc/sql_login_user_pass)
+sql_pass=$(sudo cat /etc/sql_root_pass)
 
 # read entries from users_actions
 while read -r line
@@ -28,6 +28,7 @@ do
 		# delete empty lines
 		sudo sed '/^$/d' /etc/bind/db.mercury | sudo tee /tmp/dns
 		sudo cp /tmp/dns /etc/bind/db.mercury
+		sudo rm -rf /tmp/dns
 
 		# delete vhost
 		echo "[-] $(display_date) - deleting Apache2 virtual host ..." |& tee -a "$log_file"
@@ -50,15 +51,15 @@ do
 
 		# delete sql entry once user created
 		echo "[!] $(display_date) - deleting user entry from users_actions.user_acts ..." |& tee -a "$log_file"
-		echo "DELETE FROM user_acts WHERE username = '$username' AND action = 'del'" | mysql -u root -p"$(cat /etc/sql_pass)" users_actions
+		echo "DELETE FROM user_acts WHERE username = '$username' AND action = 'del'" | mysql -u root -p"$sql_pass" users_actions
 
 		echo "[+] $(display_date) - user $username was deleted successfully" |& tee -a "$log_file"
 
 		# send mail
-		echo -e "Subject: == USER $username DELETED ==\\n$(tail -11 "$log_file")" | sudo sendmail -f delete-user@mercury.cells.es ismael
+		echo -e "Subject: == USER $username DELETED ==\\n$(tail -10 "$log_file")" | sudo sendmail -f delete-user@mercury.cells.es ismael
 
 		echo "" |& tee -a "$log_file"
 	else
-		echo -e "Subject: == USER $username DELETION FAILED ==\\n$(tail -11 $log_file)" | sudo sendmail -f delete-user@mercury.cells.es ismael
+		echo -e "Subject: == USER $username DELETION FAILED ==\\n$(tail -10 $log_file)" | sudo sendmail -f delete-user@mercury.cells.es ismael
 	fi
-done < <(echo "SELECT username FROM user_acts WHERE action = 'del'" | mysql -u login_user -p"$sql_pass" users_actions | tail -n +2)
+done < <(echo "SELECT username FROM user_acts WHERE action = 'del'" | mysql -u root -p"$sql_pass" users_actions | tail -n +2)

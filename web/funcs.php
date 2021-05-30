@@ -161,8 +161,8 @@
 	function change_password($username, $password, $new_password, $new_password2) {
 		## DATABASE ##
 		define("DB_SERVER_cha", "localhost");
-		define("DB_USERNAME_cha", "change_user");
-		define("DB_PASSWORD_cha", "usertochange");
+		define("DB_USERNAME_cha", "action_user");
+		define("DB_PASSWORD_cha", "usertodoactions");
 
 		$db_conn = mysqli_connect(DB_SERVER_cha, DB_USERNAME_cha, DB_PASSWORD_cha);
 
